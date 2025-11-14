@@ -140,3 +140,114 @@ curl -X POST "http://localhost:8000/api/tickets" \
     "tags": "login,auth",
     "requester_id": 1
   }'
+``` 
+
+**Ticket Status Options:** `open` | `in_progress` | `resolved` | `closed`  
+**Priority Options:** `low` | `medium` | `high` | `urgent`
+
+**Filtering & Pagination Example**
+```bash
+GET /api/tickets?page=1&page_size=20&status=open&priority=high&requester_id=1
+```
+
+**Example: Update Ticket**
+```bash
+curl -X PUT "http://localhost:8000/api/tickets/1" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "in_progress"}'
+```
+
+## Data Models
+
+### User
+- `id`: Primary key  
+- `email`: Email address (unique)  
+- `name`: Username  
+- `created_at`: Creation timestamp  
+
+### Ticket
+- `id`: Primary key  
+- `title`: Title  
+- `content`: Detailed content  
+- `status`: Status (`open`, `in_progress`, `resolved`, `closed`)  
+- `priority`: Priority (`low`, `medium`, `high`, `urgent`)  
+- `tags`: Tags (comma-separated)  
+- `requester_id`: Requester ID (foreign key → User)  
+- `created_at`: Creation timestamp  
+- `updated_at`: Update timestamp  
+
+### Reply
+- `id`: Primary key  
+- `ticket_id`: Ticket ID (foreign key → Ticket)  
+- `author_id`: Author ID (foreign key → User)  
+- `content`: Reply content  
+- `created_at`: Creation timestamp  
+
+---
+
+## Testing
+
+### Run Backend Tests
+```bash
+make test-backend
+```
+
+Test coverage:
+- User CRUD
+- Ticket CRUD (including filtering and pagination)
+- Ticket replies
+- Cascade delete (deleting a ticket automatically deletes related replies)
+
+Full test file: `backend/tests/test_tickets_crud.py`
+
+## Developer Guide
+
+### Common Commands
+
+```bash
+# Environment initialization
+make bootstrap
+
+# Development mode (recommended)
+make run-backend   # Terminal 1: start backend
+make run-frontend  # Terminal 2: start frontend
+
+# Docker-based deployment
+make dev-up        # Start all services
+make dev-down      # Stop all services
+make dev-logs      # View logs
+
+# Testing
+make test-backend  # Run backend tests
+
+# Code quality
+make lint          # Lint code
+```
+
+### Environment Variable Configuration
+
+Copy `backend/.env.example` to `backend/.env` and modify as needed:
+
+```bash
+# Database configuration
+DATABASE_URL=sqlite+aiosqlite:///./astratickets.db
+
+# Vector store configuration
+VECTOR_STORE_PATH=./vector_store
+
+# LLM configuration (optional)
+# OPENAI_API_KEY=sk-...
+# LLM_PROVIDER=openai
+```
+
+## Deployment
+
+### Docker Compose (Recommended)
+
+```bash
+docker compose -f infra/docker-compose.yml up -d
+```
+
+### Manual Deployment
+
+Refer to `docs/deployment.md` (to be completed)

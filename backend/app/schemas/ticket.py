@@ -16,7 +16,7 @@ class TicketBase(BaseModel):
     content: str
     status: TicketStatus | None = "open"
     priority: TicketPriority | None = "medium"
-    tags: str | None = None  # comma-separated
+    tags: str | None = None  # comma-separated for Lesson 2
 
 
 class TicketCreate(TicketBase):

@@ -1,6 +1,6 @@
 """Entry point for the AstraTickets FastAPI service.
 
-Lesson 2: mounts domain routers and prepares the database.
+mounts domain routers and prepares the database.
 """
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
@@ -28,7 +28,7 @@ app = FastAPI(title=settings.app_name, lifespan=lifespan)
 
 @app.get("/health", tags=["system"])
 async def health_check() -> dict[str, str]:
-    """Lightweight probe for Lesson 1 demos."""
+    """Lightweight probe demos."""
     return {"status": "ok", "environment": settings.environment}
 
 

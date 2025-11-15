@@ -1,4 +1,4 @@
-"""ORM models: User, Ticket, Reply."""
+"""ORM models for User, Ticket, Reply."""
 from __future__ import annotations
 
 from datetime import datetime, timezone

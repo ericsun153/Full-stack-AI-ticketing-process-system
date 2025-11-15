@@ -63,26 +63,69 @@ An enterprise-level intelligent customer service ticketing system that covers th
 └── AGENTS.md         # Repository collaboration guidelines
 ```
 
-## Quick Start
-1. **Install dependencies**
-   ```bash
-   make bootstrap
-   ```
-2. **Start the FastAPI backend**
-   ```bash
-   make run-backend
-   ```
-3. **Start the React frontend**
-   ```bash
-   make run-frontend
-   ```
-4. **Launch the full stack (optional)**
-   ```bash
-   make dev-up
-   ```
-   > On first run, this will execute `npm install` inside the container (requires network access to NPM). Once completed, the frontend, backend, and Chroma will all start simultaneously.
+## 🚀 Local Development
 
-Visit `http://localhost:8000/health` to verify the API, or open `http://localhost:5173` in your browser to view the interface.
+### 1. Install dependencies
+
+```bash
+make bootstrap
+```
+
+This command creates a Python virtual environment, installs backend and frontend dependencies.
+
+---
+
+### 2. Configure environment variables
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+Modify `.env` as needed.
+
+---
+
+### 3. Start backend service
+
+```bash
+make run-backend
+```
+
+Backend endpoints:  
+- API root → http://localhost:8000  
+- Swagger → http://localhost:8000/docs  
+- Health check → http://localhost:8000/health  
+
+---
+
+### 4. Start frontend service (new terminal)
+
+```bash
+make run-frontend
+```
+
+Frontend pages:  
+- Home: http://localhost:5173/  
+- Ticket list: http://localhost:5173/tickets  
+- Create ticket: http://localhost:5173/tickets/new  
+- Ticket detail: http://localhost:5173/tickets/{id}
+
+---
+
+### 5. Full-stack start using Docker
+
+```bash
+make dev-up
+```
+
+Stop with:
+
+```bash
+make dev-down
+```
+
+---
 
 ## Architecture Overview
 - **Frontend**：Displays course milestones and tech stack cards; serves as the container for the upcoming Ticket UI.
@@ -90,155 +133,226 @@ Visit `http://localhost:8000/health` to verify the API, or open `http://localhos
 - **Chroma**：Pre-launched by Docker and ready to receive embedded vectors.
 - **LLM Interface**：Not yet connected; can be enabled via environment variables.
 
-## API Documentation
+## 🎨 Frontend Features
 
-### Route Prefix: `/api`
+### Ticket List Page (`/tickets`)
+- Table view (ID, title, status, priority, tags, created time)  
+- Filters: status, priority  
+- Pagination  
+- Color-coded tags  
+- Clickable details  
+- Buttons: **New Ticket**, **Refresh**
 
-Full API documentation is available via Swagger UI:  
-`http://localhost:8000/docs`
+### Create Ticket Page (`/tickets/new`)
+- Fields:
+  - title (required)
+  - content (required)
+  - requester (dropdown)
+  - status (default Open)
+  - priority (default Medium)
+  - tags (comma-separated)
+- Real-time validation  
+- Redirect to detail page after creation  
+- Error handling for invalid requester  
+
+### Ticket Detail Page (`/tickets/{id}`)
+#### View:
+- Ticket info  
+- Replies in chronological order  
+- Requester and reply authors
+
+#### Edit:
+- Editable modal  
+- Partial update allowed  
+- Auto refresh  
+
+#### Delete:
+- Confirmation modal  
+- Cascade delete replies  
+
+#### Reply:
+- Choose reply author  
+- Enter content  
+- Auto refresh reply list  
 
 ---
 
-## Main Endpoints
+## 📡 API Documentation
 
-### User Management
+### Route Prefix: `/api`
+
+Swagger UI → http://localhost:8000/docs
+
+---
+
+### User Management API
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST   | `/api/users`        | Create a user |
-| GET    | `/api/users`        | Get user list (supports pagination) |
-| GET    | `/api/users/{id}`   | Get user details |
+| POST | `/api/users` | Create user |
+| GET | `/api/users` | List users |
+| GET | `/api/users/{id}` | User details |
 
-**Example: Create User**
+### Example: Create User
+
 ```bash
 curl -X POST "http://localhost:8000/api/users" \
   -H "Content-Type: application/json" \
   -d '{"email": "alice@example.com", "name": "Alice"}'
 ```
 
-#### Ticket Management
+---
 
-| Method | Path                            | Description                                      |
-|--------|---------------------------------|--------------------------------------------------|
-| POST   | `/api/tickets`                 | Create a ticket                                  |
-| GET    | `/api/tickets`                 | Get ticket list (supports filtering & pagination) |
-| GET    | `/api/tickets/{id}`            | Get ticket details                               |
-| PUT    | `/api/tickets/{id}`            | Update a ticket                                  |
-| DELETE | `/api/tickets/{id}`            | Delete a ticket                                  |
-| POST   | `/api/tickets/{id}/replies`    | Add a ticket reply                               |
-| GET    | `/api/tickets/{id}/replies`    | Get ticket reply list                            |
+### Ticket Management API
 
-**Example: Create Ticket**
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/tickets` | Create ticket |
+| GET | `/api/tickets` | List tickets (filters + pagination) |
+| GET | `/api/tickets/{id}` | Ticket details |
+| PUT | `/api/tickets/{id}` | Update ticket |
+| DELETE | `/api/tickets/{id}` | Delete ticket |
+| POST | `/api/tickets/{id}/replies` | Add reply |
+| GET | `/api/tickets/{id}/replies` | List replies |
+
+### Example: Create Ticket
+
 ```bash
 curl -X POST "http://localhost:8000/api/tickets" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Cannot login",
-    "content": "I am unable to login with my account",
+    "content": "I am unable to login",
     "priority": "high",
     "status": "open",
     "tags": "login,auth",
     "requester_id": 1
   }'
-``` 
+```
 
-**Ticket Status Options:** `open` | `in_progress` | `resolved` | `closed`  
-**Priority Options:** `low` | `medium` | `high` | `urgent`
+### Filtering Example
 
-**Filtering & Pagination Example**
 ```bash
 GET /api/tickets?page=1&page_size=20&status=open&priority=high&requester_id=1
 ```
 
-**Example: Update Ticket**
+### Update Ticket Example
+
 ```bash
 curl -X PUT "http://localhost:8000/api/tickets/1" \
   -H "Content-Type: application/json" \
   -d '{"status": "in_progress"}'
 ```
 
-## Data Models
+---
+
+## 📘 Data Models
 
 ### User
-- `id`: Primary key  
-- `email`: Email address (unique)  
-- `name`: Username  
-- `created_at`: Creation timestamp  
+- id  
+- email  
+- name  
+- created_at  
 
 ### Ticket
-- `id`: Primary key  
-- `title`: Title  
-- `content`: Detailed content  
-- `status`: Status (`open`, `in_progress`, `resolved`, `closed`)  
-- `priority`: Priority (`low`, `medium`, `high`, `urgent`)  
-- `tags`: Tags (comma-separated)  
-- `requester_id`: Requester ID (foreign key → User)  
-- `created_at`: Creation timestamp  
-- `updated_at`: Update timestamp  
+- id  
+- title  
+- content  
+- status  
+- priority  
+- tags  
+- requester_id  
+- created_at  
+- updated_at  
 
 ### Reply
-- `id`: Primary key  
-- `ticket_id`: Ticket ID (foreign key → Ticket)  
-- `author_id`: Author ID (foreign key → User)  
-- `content`: Reply content  
-- `created_at`: Creation timestamp  
+- id  
+- ticket_id  
+- author_id  
+- content  
+- created_at  
 
 ---
 
-## Testing
+## 🧪 Testing
 
-### Run Backend Tests
+### Backend tests
+
 ```bash
 make test-backend
 ```
 
+Or:
+
+```bash
+cd backend && pytest tests/ -v
+```
+
 Test coverage:
-- User CRUD
-- Ticket CRUD (including filtering and pagination)
-- Ticket replies
-- Cascade delete (deleting a ticket automatically deletes related replies)
+- User CRUD  
+- Ticket CRUD  
+- Filtering + pagination  
+- Replies  
+- Cascade delete  
+- Foreign key validation  
 
-Full test file: `backend/tests/test_tickets_crud.py`
+Test file:
 
-## Developer Guide
+```bash
+backend/tests/test_tickets_crud.py
+```
+
+---
+
+### Frontend testing
+
+```bash
+cd frontend && npm run dev
+```
+
+```bash
+cd frontend && npm run build
+```
+
+```bash
+cd frontend && npm run lint
+```
+
+---
+
+## 🛠 Developer Guide
 
 ### Common Commands
 
 ```bash
-# Environment initialization
 make bootstrap
-
-# Development mode (recommended)
-make run-backend   # Terminal 1: start backend
-make run-frontend  # Terminal 2: start frontend
-
-# Docker-based deployment
-make dev-up        # Start all services
-make dev-down      # Stop all services
-make dev-logs      # View logs
-
-# Testing
-make test-backend  # Run backend tests
-
-# Code quality
-make lint          # Lint code
+make run-backend
+make run-frontend
+make dev-up
+make dev-down
+make dev-logs
+make test-backend
+make lint
+make format
 ```
 
-### Environment Variable Configuration
+---
 
-Copy `backend/.env.example` to `backend/.env` and modify as needed:
+## ⚙ Environment Variables
 
 ```bash
 # Database configuration
 DATABASE_URL=sqlite+aiosqlite:///./astratickets.db
 
-# Vector store configuration
+# Vector store
 VECTOR_STORE_PATH=./vector_store
 
-# LLM configuration (optional)
+# LLM (optional)
 # OPENAI_API_KEY=sk-...
 # LLM_PROVIDER=openai
 ```
+
+---
 
 ## Deployment
 
@@ -248,6 +362,35 @@ VECTOR_STORE_PATH=./vector_store
 docker compose -f infra/docker-compose.yml up -d
 ```
 
-### Manual Deployment
+---
 
-Refer to `docs/deployment.md` (to be completed)
+## Production Deployment
+
+### 1. Backend Deployment
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+---
+
+### 2. Frontend Deployment
+
+```bash
+cd frontend
+npm install
+npm run build
+# Deploy the dist/ folder to a static web server (Nginx, Caddy, etc.)
+```
+
+---
+
+### 3. Database: Switch to PostgreSQL or MySQL
+
+Edit `backend/.env`:
+
+```bash
+DATABASE_URL=postgresql://user:password@localhost:5432/astratickets
+```

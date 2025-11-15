@@ -13,7 +13,7 @@ An enterprise-level intelligent customer service ticketing system that covers th
 - **Filtering & pagination**: Status, priority, requester filtering  
 - **Deletion cascade**: Ticket → Replies
 
-### AI Features (In Progress)
+### AI Features
 - **RAG retrieval** powered by Chroma + SentenceTransformers  
 - **AI ticket classification** (automatic labeling)  
 - **AI auto-reply** (LLM first response)  
@@ -274,6 +274,27 @@ curl -X PUT "http://localhost:8000/api/tickets/1" \
 
 ---
 
+## Knowledge Base Page (`/kb`)
+
+- **Document Import**:
+  - Paste text or upload `.md/.txt` files
+  - Optional chunking (enabled by default), with configurable window size and overlap
+  - After import, the inserted chunk IDs are displayed
+- **Search Functionality**:
+  - Enter a query and specify Top-K results
+  - Displays matched content, metadata, and distance
+  - Supports deleting entries by result ID
+
+### Knowledge Base & Retrieval API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/kb/ingest` | Ingest documents (supports chunking) into the Chroma collection |
+| POST | `/api/kb/search` | Similarity search |
+| POST | `/api/kb/delete` | Delete a document by ID |
+
+---
+
 ## 🧪 Testing
 
 ### Backend tests
@@ -334,6 +355,8 @@ make dev-logs
 make test-backend
 make lint
 make format
+# Insert sample knowledge base (using script)
+python scripts/embed_kb.py --path samples/kb --collection kb_main
 ```
 
 ---
@@ -346,6 +369,9 @@ DATABASE_URL=sqlite+aiosqlite:///./astratickets.db
 
 # Vector store
 VECTOR_STORE_PATH=./vector_store
+
+# SentenceTransformers Model
+# SENTENCE_TRANSFORMERS_MODEL=sentence-transformers/all-MiniLM-L6-v2
 
 # LLM (optional)
 # OPENAI_API_KEY=sk-...

@@ -20,6 +20,12 @@ An enterprise-level intelligent customer service ticketing system that covers th
 - **Human–AI collaborative editing** (AI suggestions + manual review)  
 - **Analytics dashboard** (trends, SLA, satisfaction)
 
+- **AI Suggestion**:
+  - Click **“Generate”** to call the backend endpoint `/api/ai/tickets/{id}/suggest`
+  - Display the automatically predicted ticket category, confidence score, recommended priority, and tags
+  - Show a list of retrieved knowledge-base snippets
+  - Provide a one-click action to insert the **AI Draft Reply** into the reply form below, allowing the agent to make manual adjustments before sending
+
 ---
 
 ## 🧱 Technology Stack
@@ -43,6 +49,11 @@ An enterprise-level intelligent customer service ticketing system that covers th
 - **SentenceTransformers** (Embedding models)
 - **LLMs** (OpenAI, DeepSeek, Qwen, Local models)
 - **LangChain / LlamaIndex** (RAG framework)
+- **Embedding Model**: SentenceTransformers (preferred; automatically falls back to a hash-based vectorizer if unavailable)
+- **RAG Pipeline**: Custom chunking + vectorization + Chroma similarity search (backend located at `app/rag/*`)
+- **LLM / AI Reply**:
+  - Prioritizes OpenAI-compatible APIs (OpenAI / DeepSeek / Qwen / local proxy, etc., all configurable via environment variables)
+  - If no external model is configured, generates a draft reply using a local template engine based on retrieved knowledge-base snippets
 
 ### Infrastructure
 - **Docker & Docker Compose**

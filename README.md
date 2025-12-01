@@ -393,11 +393,27 @@ VECTOR_STORE_PATH=./vector_store
 
 ## Deployment
 
-### Docker Compose (Recommended)
+### Docker Compose (Production/Demo)
 
-```bash
-docker compose -f infra/docker-compose.yml up -d
-```
+1. **Prepare environment variables:**  
+   Copy `backend/.env.example` to `.env`.  
+   At minimum, set `SECRET_KEY` to a random string.  
+   You may also update the database connection string to use PostgreSQL/MySQL if needed.
+
+2. **Build and start services:**
+   ```bash
+   make prod-up
+   # Or:
+   cd infra && docker compose -f docker-compose.prod.yml up --build -d
+   ```
+
+  - Frontend: `http://localhost:8080`
+  - Backend: `http://localhost:8000` (Swagger available at `/docs`)
+
+3. Stop and clean up:
+  ```bash
+  make prod-down
+  ```
 
 ---
 
